@@ -1,0 +1,22 @@
+version_info: "0"
+resources:
+- '@type': type.googleapis.com/envoy.config.route.v3.RouteConfiguration
+  name: "" # Other names result in "Filesystem config update rejected: Unexpected RDS configuration (expecting )"
+  virtual_hosts:
+  - name: fallback
+    domains: ["*"]
+    routes:
+    - match:
+        prefix: "/"
+      direct_response:
+        status: 200
+        body:
+          inline_string: >
+            No content was added at build time
+      response_headers_to_add:
+      - header:
+          key: content-type
+          value: text/plain
+      - header:
+          key: cache-control
+          value: max-age=0, no-cache
