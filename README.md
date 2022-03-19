@@ -1,4 +1,4 @@
-# envoy-static-webserver
+# envoystatic
 
 Rethinking the static web server for immutable infrastructure.
 

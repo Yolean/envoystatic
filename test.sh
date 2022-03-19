@@ -13,7 +13,7 @@ echo "==> Collecting build settings"
 [ -z "$REGISTRY" ] || PREFIX="$REGISTRY/"
 PUSH="--push"
 
-SOURCE_COMMIT=$(git rev-parse --verify HEAD 2>/dev/null || echo '')
+SOURCE_COMMIT=$(git rev-parse --verify --short HEAD 2>/dev/null || echo '')
 if [[ ! -z "$SOURCE_COMMIT" ]]; then
   GIT_STATUS="$(git status --untracked-files=normal --porcelain=v2)"
   if [[ ! -z "$GIT_STATUS" ]]; then
@@ -83,7 +83,6 @@ for TEST in $TESTS; do
   echo "==> Starting webserver $TEST using container name $NAME"
   docker run $RUN_OPTS -p $PORT:8080 --name $NAME $TESTIMAGE
 
-  trap "echo Terminating; docker stop $NAME; exit" SIGINT
   echo "==> Checking readiness using propbe-ish curl to $HOST$HEALTH_CHECK_PATH"
   until sleep 1 && curl -f -H 'User-Agent: kube-probe/mock' \
     -o /dev/null -w "%{http_code}\n" $HOST$HEALTH_CHECK_PATH; do
@@ -95,6 +94,8 @@ for TEST in $TESTS; do
   docker logs $NAME 2>&1 | grep -E '(warning|error|critical)' || echo "# None"
   echo "==> Startig test $TEST"
   HOST=$HOST ./tests/$TEST/$TEST.sh
+  echo "==> Test exited ok, killing container"
+  docker stop $NAME
 done
 
 echo "==> Tests passed, build and push $PLATFORM"
@@ -107,8 +108,9 @@ for STAGE in tooling envoy; do
   TAG="$STAGE-"
   # [ "$TAG" != "envoy-" ] || TAG="$TAG$ENVOY_VERSION-"
   [ "$TAG" != "-" ] || TAG=""
-  IMAGE=${PREFIX}yolean/envoystatic:$STAGE-$SOURCE_COMMIT$XTAG
+  IMAGE=${PREFIX}yolean/envoystatic:$TAG$SOURCE_COMMIT$XTAG
+  LATEST=${PREFIX}yolean/envoystatic:$STAGE
   echo "==> $IMAGE"
-  $BUILDX build $PUSH $PLATFORM $BUILD_ARGS -t $IMAGE .
+  $BUILDX build $PUSH $PLATFORM $BUILD_ARGS --target $STAGE -t $IMAGE -t $LATEST .
 done
 unset IMAGE
