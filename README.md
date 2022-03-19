@@ -27,6 +27,17 @@ New needs when static content goes "immutable infrastructure":
 
 See [example](./tests) [Dockerfile](./tests/html01/Dockerfile).
 
+The [yolean/envoystatic](yolean/envoystatic)`:tooling-[gitref]`
+image is for the build step.
+
+The [yolean/envoystatic](yolean/envoystatic)`:envoy-[gitref]`
+is slightly more opinionated than the official envoy image.
+- Sets loglevel and xDS names as default command.
+- Uses subfolders to `/etc/envoy` for bootstrap and xDS
+  to allow separate mounts if desired.
+- Runs as envoy's nonroot by default
+- TODO distroless once envoy's distroless becomes multi-arch.
+
 ## Mime types
 
 By extension, stdlib: https://pkg.go.dev/mime#TypeByExtension

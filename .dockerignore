@@ -1,2 +1,6 @@
-Dockerfile
-*.sh
+*
+!go.*
+!cmd
+!pkg
+!bootstrap
+!tests/html01

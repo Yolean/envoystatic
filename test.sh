@@ -64,7 +64,7 @@ for TEST in $TESTS; do
 
   echo "==> Running local transform"
   tmpout=$(mktemp -d)
-  go run ./cmd/envoystatic route --in=./tests/$TEST --out="$tmpout/docroot"
+  go run ./cmd/envoystatic route --in=./tests/$TEST --out="$tmpout/docroot" --rdsyaml=-
   ls -1 $tmpout/docroot
 
   echo "==> Building downstream image"

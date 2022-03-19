@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	"fmt"
+	"io/ioutil"
 	"os"
 
 	"github.com/yolean/envoystatic/v1/pkg/prepare"
@@ -69,9 +69,13 @@ func main() {
 	}
 	routeConfiguration := routeconfig.Generate(docroot, content)
 
-	rdsYaml := routeconfig.RdsYaml(routeConfiguration)
-	if rdsyaml != "-" {
-		zap.L().Fatal("Only stdout is supported for RDS yaml")
+	rds := routeconfig.RdsYaml(routeConfiguration)
+	if rdsyaml == "-" {
+		os.Stdout.Write(rds)
+	} else {
+		err = ioutil.WriteFile(rdsyaml, rds, 0644)
+		if err != nil {
+			zap.L().Fatal("Failed to write RDS yaml", zap.String("path", rdsyaml))
+		}
 	}
-	fmt.Println(string(rdsYaml))
 }
