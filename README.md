@@ -23,6 +23,10 @@ New needs when static content goes "immutable infrastructure":
 - Predictable memory footprint
 - Prometheus metrics export
 
+## How to use
+
+See [example](./tests) [Dockerfile](./tests/html01/Dockerfile).
+
 ## Mime types
 
 By extension, stdlib: https://pkg.go.dev/mime#TypeByExtension
