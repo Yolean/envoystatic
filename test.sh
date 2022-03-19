@@ -11,7 +11,7 @@ echo "==> Collecting build settings"
 [ -n "$PLATFORMS" ] || PLATFORMS="linux/amd64,linux/arm64/v8"
 [ -n "$PLATFORM" ] || PLATFORM="--platform=$PLATFORMS"
 [ -z "$REGISTRY" ] || PREFIX="$REGISTRY/"
-PUSH="--push"
+[ -n "$PUSH" ] || [ "$NOPUSH" = "true" ] || PUSH="--push"
 
 SOURCE_COMMIT=$(git rev-parse --verify --short HEAD 2>/dev/null || echo '')
 if [[ ! -z "$SOURCE_COMMIT" ]]; then
@@ -20,7 +20,7 @@ if [[ ! -z "$SOURCE_COMMIT" ]]; then
     echo "# Tagging as -dirty due to:"
     echo "$GIT_STATUS"
     SOURCE_COMMIT="$SOURCE_COMMIT-dirty"
-    PUSH=""
+    [ PUSH != "--push" ] || PUSH=""
   fi
 fi
 # BUILD_ARGS="$BUILD_ARGS --build-arg SOURCE_COMMIT=$SOURCE_COMMIT"

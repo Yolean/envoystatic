@@ -6,4 +6,6 @@ set -eo pipefail
 
 [ -n "CURL_OPTS" ] || [ -z "$DEBUG" ] || CURL_OPTS="-v"
 
-curl $CURL_OPTS -f $HOST/index.html
+curl -v $CURL_OPTS -f $HOST/index.html
+
+curl -I $CURL_OPTS -f $HOST/index.html | grep 'text/html'

@@ -36,6 +36,8 @@ RUN set -e; \
 
 USER envoy:nogroup
 
+EXPOSE 8080/tcp
+
 CMD [ "envoy", \
   "-c", "/etc/envoy/bootstrap/envoy.yaml", \
   "--service-cluster", "envoystatic", \

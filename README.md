@@ -38,6 +38,14 @@ is slightly more opinionated than the official envoy image.
 - Runs as envoy's nonroot by default
 - TODO distroless once envoy's distroless becomes multi-arch.
 
+## Disclaimer
+
+This project is a Proof-of-concept and not necessarily suitable for production.
+It explores if build time preparation of an HTTP server is preferrable to serving a directory as-is.
+The most notable caveat is that
+[Envoy's warning on direct responses](https://www.envoyproxy.io/docs/envoy/v1.21.1/api-v3/config/route/v3/route.proto.html?highlight=max_direct_response_body_size_bytes)
+applies because we [increase the limit](https://github.com/envoyproxy/envoy/pull/14778) to an arbitrarily high value.
+
 ## Mime types
 
 By extension, stdlib: https://pkg.go.dev/mime#TypeByExtension
@@ -76,10 +84,15 @@ but if anyone has benchmarks we're of course curious.
 ## Dev loop
 
 ```
+# Start the first test container for exploration
 DEBUG=true RUN_OPTS="--rm" ./test.sh
 
+# Run all tests
 docker stop envoystatic-test
-DEBUG=true ./test.sh
+DEBUG=true NOPUSH=true ./test.sh
+
+# For iterating with a local downstream docker build
+DEBUG=true NOPUSH=true PLATFORM="--load" ./test.sh
 ```
 
 ## References
@@ -89,3 +102,10 @@ https://github.com/envoyproxy/envoy/issues/378
 - https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/network/http_connection_manager/v3/http_connection_manager.proto.html?highlight=route_config
   - `rds` https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/network/http_connection_manager/v3/http_connection_manager.proto.html?highlight=route_config#envoy-v3-api-msg-extensions-filters-network-http-connection-manager-v3-rds
     - `config_source` `path: /etc/envoy...`
+
+## Misc TODOs
+
+- Validate against RDS errors at runtime, at least in test. Ideally make them fatal.
+- Update bootstrap config according to deprecation warnings.
+- A `skaffold dev` loop with output dir and route.yaml sync, for downstream work.
+  - For example with `npm run build` in a Nextjs project

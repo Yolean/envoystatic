@@ -8,6 +8,7 @@ import (
 	envoy_config_core_v3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	route "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 var ValidateETag = regexp.MustCompile(`^"[0-9a-f]+"$`) // Though we actually don't care what's between the quotes
@@ -22,6 +23,7 @@ func Generate(docroot string, content *RouteContent) *route.RouteConfiguration {
 	}
 
 	routes := []*route.Route{}
+	maxsize := uint32(10 * 1024 * 1024)
 
 	for _, c := range content.Items {
 		if c.ContentPath != "" && c.Content != nil {
@@ -60,7 +62,8 @@ func Generate(docroot string, content *RouteContent) *route.RouteConfiguration {
 	}
 
 	config := &route.RouteConfiguration{
-		Name: "",
+		MaxDirectResponseBodySizeBytes: wrapperspb.UInt32(maxsize),
+		Name:                           "",
 		VirtualHosts: []*route.VirtualHost{{
 			Name:    "static",
 			Domains: []string{"*"},
