@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	envoy_config_core_v3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
+	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	route "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/wrapperspb"
@@ -39,6 +39,17 @@ func Generate(docroot string, content *RouteContent) *route.RouteConfiguration {
 			zap.L().Fatal("Invalid ETag", zap.String("path", c.Path), zap.String("etag", c.ETag))
 		}
 
+		headers := []*core.HeaderValueOption{}
+		if c.ContentType != "" {
+			headers = append(headers, &core.HeaderValueOption{
+				Append: wrapperspb.Bool(false),
+				Header: &core.HeaderValue{
+					Key:   "content-type",
+					Value: c.ContentType,
+				},
+			})
+		}
+
 		readpath := filepath.Join(docroot, c.ContentPath)
 		r := &route.Route{
 			Match: &route.RouteMatch{
@@ -49,13 +60,14 @@ func Generate(docroot string, content *RouteContent) *route.RouteConfiguration {
 			Action: &route.Route_DirectResponse{
 				DirectResponse: &route.DirectResponseAction{
 					Status: 200,
-					Body: &envoy_config_core_v3.DataSource{
-						Specifier: &envoy_config_core_v3.DataSource_Filename{
+					Body: &core.DataSource{
+						Specifier: &core.DataSource_Filename{
 							Filename: readpath,
 						},
 					},
 				},
 			},
+			ResponseHeadersToAdd: headers,
 		}
 		routes = append(routes, r)
 		zap.L().Info("Route generated for", zap.String("path", readpath))

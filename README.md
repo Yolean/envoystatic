@@ -106,6 +106,9 @@ https://github.com/envoyproxy/envoy/issues/378
 ## Misc TODOs
 
 - Validate against RDS errors at runtime, at least in test. Ideally make them fatal.
+- Adapt `max_direct_response_body_size_bytes` to the size of the largest processed file.
 - Update bootstrap config according to deprecation warnings.
 - A `skaffold dev` loop with output dir and route.yaml sync, for downstream work.
   - For example with `npm run build` in a Nextjs project
+- Favicon support
+- Redirect to index.html per subdir
