@@ -9,9 +9,6 @@ While other static file servers mount a volume,
 here we build a container that represents the content at a specific state.
 There is no longer a need to check the underlying file system for changes.
 
-Caching can be the task of the underlying file system.
-With Envoy, files smaller than 4k can be inlined.
-
 Problems that Kubernetes solves that web servers no longer need to solve:
 - Scaling horizontally
 
