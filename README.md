@@ -85,6 +85,8 @@ Requires [ystack](https://github.com/Yolean/ystack), RUNPLATFORM should be your 
 ```
 RUNPLATFORM=linux/amd64
 EXPORT_CACHE=false skaffold build --platform=$RUNPLATFORM --file-output=build.artifacts --cache-artifacts=false
+# The job is required because we need to run specs in cluster; skaffold verify runs locally
+kubectl delete job envoystatic-tests-html01-spec --ignore-not-found=true
 skaffold deploy -a build.artifacts
 skaffold verify -a build.artifacts
 ```
@@ -93,10 +95,11 @@ skaffold verify -a build.artifacts
 
 ```
 skaffold build --file-output=build.artifacts --cache-artifacts=false
+kubectl delete job envoystatic-tests-html01-spec --ignore-not-found=true
 skaffold deploy -a build.artifacts
 skaffold verify -a build.artifacts
-echo "# script to push images:"
-cat build.artifacts | jq '.'
+echo "# result images"
+cat build.artifacts | jq -r '.builds | .[] | select(.imageName | contains("test") | not) | .tag'
 ```
 
 ## References

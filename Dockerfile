@@ -27,6 +27,12 @@ ENTRYPOINT [ "/usr/local/bin/envoystatic" ]
 
 FROM --platform=$TARGETPLATFORM envoyproxy/envoy:${envoy_version} as envoy
 
+# This layer is used as the -debug image, until we have a skaffold verify workflow we need curl
+RUN set -ex; export DEBIAN_FRONTEND=noninteractive; runDeps='curl'; \
+  apt-get update && apt-get install -y $runDeps --no-install-recommends; \
+  rm -rf /var/lib/apt/lists; \
+  rm -rf /var/log/dpkg.log /var/log/alternatives.log /var/log/apt /root/.gnupg
+
 COPY bootstrap/* /etc/envoy/bootstrap/
 
 RUN set -e; \

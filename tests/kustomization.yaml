@@ -6,3 +6,4 @@ namePrefix: envoystatic-tests-
 resources:
 - html01-service.yaml
 - html01-deployment.yaml
+- html01-spec-job.yaml
