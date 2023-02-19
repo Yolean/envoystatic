@@ -80,16 +80,23 @@ but if anyone has benchmarks we're of course curious.
 
 ## Dev loop
 
+Requires [ystack](https://github.com/Yolean/ystack):
+
 ```
-# Start the first test container for exploration
-DEBUG=true RUN_OPTS="--rm" ./test.sh
+RUNPLATFORM=linux/amd64
+EXPORT_CACHE=false skaffold build --platform=$RUNPLATFORM --file-output=build.artifacts --cache-artifacts=false
+skaffold deploy -a build.artifacts
+skaffold verify -a build.artifacts
+```
 
-# Run all tests
-docker stop envoystatic-test
-DEBUG=true NOPUSH=true ./test.sh
+## Release
 
-# For iterating with a local downstream docker build
-DEBUG=true NOPUSH=true PLATFORM="--load" ./test.sh
+```
+skaffold build --file-output=build.artifacts --cache-artifacts=false
+skaffold deploy -a build.artifacts
+skaffold verify -a build.artifacts
+echo "# script to push images:"
+cat build.artifacts | jq '.'
 ```
 
 ## References

@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: html01
+  labels:
+    app: tests-html01
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tests-html01
+  template:
+    metadata:
+      labels:
+        app: tests-html01
+    spec:
+      containers:
+      - name: envoy
+        # image: builds-registry.ystack.svc.cluster.local/yolean/envoystatic-tests-html01
+        # ^ = distroless, first test with regular envoy base
+        image: builds-registry.ystack.svc.cluster.local/yolean/envoystatic-tests-html01-debug
+        ports:
+        - containerPort: 8080
+          name: http
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http

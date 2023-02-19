@@ -40,6 +40,8 @@ for STAGE in tooling envoy; do
 done
 unset IMAGE
 
+exit 0
+
 echo "==> Collecting test settings"
 PORT=8080
 HOST=http://localhost:$PORT

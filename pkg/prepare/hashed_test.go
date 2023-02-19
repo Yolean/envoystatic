@@ -78,6 +78,7 @@ func TestHtml01(t *testing.T) {
 		content  string
 	}{
 		{"Dockerfile", "", 0, ""},
+		{"Dockerfile.dockerignore", "", 0, ""},
 		{"html01.sh", "", 0, ""},
 		{"index.html", "text/html; charset=utf-8", 0, ""},
 		{"script.js", "application/javascript", 25, "63314764b32e0f86ebc1b32a734cba2dabc4945b7897fc024f37f0bf16ed4226"},

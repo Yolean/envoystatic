@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.4
-ARG ENVOYVERSION="v1.25.1"
+ARG envoy_version="v1.25.1"
 
 FROM --platform=$BUILDPLATFORM golang:1.20-bullseye as build
 
@@ -25,13 +25,27 @@ VOLUME /workspace
 # but helpful to test pipelines using local docker
 ENTRYPOINT [ "/usr/local/bin/envoystatic" ]
 
-FROM --platform=$TARGETPLATFORM envoyproxy/envoy:${ENVOYVERSION} as envoy
+FROM --platform=$TARGETPLATFORM envoyproxy/envoy:${envoy_version} as envoy
 
 COPY bootstrap/* /etc/envoy/bootstrap/
 
 RUN set -e; \
   mkdir /etc/envoy/rds; \
   ln -s /etc/envoy/bootstrap/route.yaml /etc/envoy/rds/route.yaml
+
+USER envoy:nogroup
+
+EXPOSE 8080/tcp
+
+CMD [ "envoy", \
+  "-c", "/etc/envoy/bootstrap/envoy.yaml", \
+  "--service-cluster", "envoystatic", \
+  "--service-node", "envoystatic", \
+  "-l", "info" ]
+
+FROM --platform=$TARGETPLATFORM envoyproxy/envoy-distroless:${envoy_version} as envoy-distroless
+
+COPY --from=envoy /etc/envoy /etc/envoy
 
 USER envoy:nogroup
 
