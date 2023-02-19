@@ -1,5 +1,7 @@
 # syntax=docker/dockerfile:1.4
-FROM --platform=$BUILDPLATFORM golang:1.18-bullseye as build
+ARG ENVOYVERSION="v1.25.1"
+
+FROM --platform=$BUILDPLATFORM golang:1.20-bullseye as build
 
 WORKDIR /workspace
 COPY go.mod go.sum .
@@ -23,10 +25,7 @@ VOLUME /workspace
 # but helpful to test pipelines using local docker
 ENTRYPOINT [ "/usr/local/bin/envoystatic" ]
 
-# Envoy distroless is not yet multi-arch, and build arg as from tag didn't work
-# ARG ENVOY_VERSION=v1.21.1
-# FROM --platform=$TARGETPLATFORM envoyproxy/envoy:${ENVOY_VERSION} as envoy
-FROM --platform=$TARGETPLATFORM envoyproxy/envoy:v1.21.1 as envoy
+FROM --platform=$TARGETPLATFORM envoyproxy/envoy:${ENVOYVERSION} as envoy
 
 COPY bootstrap/* /etc/envoy/bootstrap/
 

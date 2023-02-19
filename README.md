@@ -109,3 +109,8 @@ https://github.com/envoyproxy/envoy/issues/378
   - For example with `npm run build` in a Nextjs project
 - Favicon support
 - Redirect to index.html per subdir
+
+An alternative to inmemory, unless/until Envoy introduces on-request read from disk,
+could be to offload files to blob storage based on size and/or other attributes.
+It would be up to the build step to prepare the blob storage, and define proxy URL mapping.
+A sidecar using Minio could be used as PoC.
