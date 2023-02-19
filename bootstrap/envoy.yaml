@@ -48,7 +48,9 @@ static_resources:
           codec_type: AUTO
           rds:
             config_source:
-              path: /etc/envoy/rds/route.yaml
+              path_config_source:
+                path: /etc/envoy/rds/route.yaml
+              resource_api_version: V3
           http_filters:
           - name: envoy.filters.http.health_check
             typed_config:
