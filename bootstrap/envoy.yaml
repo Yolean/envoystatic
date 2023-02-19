@@ -1,9 +1,10 @@
 admin:
-  access_log_path: /tmp/admin_access.log
+  access_log: []
   address:
     socket_address:
       address: 0.0.0.0
       port_value: 9901
+  ignore_global_conn_limit: true
 static_resources:
   listeners:
   - name: http
@@ -47,7 +48,9 @@ static_resources:
           codec_type: AUTO
           rds:
             config_source:
-              path: /etc/envoy/rds/route.yaml
+              path_config_source:
+                path: /etc/envoy/rds/route.yaml
+              resource_api_version: V3
           http_filters:
           - name: envoy.filters.http.health_check
             typed_config:
@@ -55,16 +58,33 @@ static_resources:
               pass_through_mode: false
               headers:
               - name: :path
-                exact_match: /
+                string_match:
+                  exact: /
               - name: user-agent
-                safe_regex_match:
-                  google_re2: {}
-                  # We have user agent headers "GoogleHC/1.0" and "kube-probe/1.17+" at the moment
-                  regex: "^(GoogleHC|kube-probe)/.*"
+                string_match:
+                  safe_regex:
+                    # We have user agent headers "GoogleHC/1.0" and "kube-probe/1.17+" at the moment
+                    regex: "^(GoogleHC|kube-probe)/.*"
           - name: envoy.filters.http.csrf
             typed_config:
               "@type": type.googleapis.com/envoy.extensions.filters.http.csrf.v3.CsrfPolicy
               filter_enabled: { "default_value": { "numerator": 1 } }
               additional_origins: []
           - name: envoy.filters.http.router
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
   clusters: []
+# https://www.envoyproxy.io/docs/envoy/latest/configuration/best_practices/edge#best-practices-edge
+# example numbers divided by 10
+layered_runtime:
+  layers:
+  - name: static_layer_0
+    static_layer:
+      envoy:
+        resource_limits:
+          listener:
+            # listener name above
+            http:
+              connection_limit: 1000
+      overload:
+        global_downstream_max_connections: 5000

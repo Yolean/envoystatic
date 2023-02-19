@@ -2,9 +2,8 @@
 [ -z "$DEBUG" ] || set -x
 set -eo pipefail
 
-#BUILDX="docker buildx"
-BUILDX=buildx
-[ "$(buildx version)" != "github.com/docker/buildx v0.8.0 c8f7c1e93ffa9cfcf926cd3e6450af957f235b07" ] && echo "Unexpected buildx version" && exit 1
+[ -n "$BUILDX" ] || BUILDX=buildx
+[ "$($BUILDX version)" != "github.com/docker/buildx v0.10.0 876462897612d36679153c3414f7689626251501" ] && echo "Unexpected buildx version" && exit 1
 # BUILDX="$BUILDX --progress=plain"
 
 echo "==> Collecting build settings"
@@ -25,7 +24,7 @@ if [[ ! -z "$SOURCE_COMMIT" ]]; then
 fi
 # BUILD_ARGS="$BUILD_ARGS --build-arg SOURCE_COMMIT=$SOURCE_COMMIT"
 
-# [ -n "$ENVOY_VERSION" ] || ENVOY_VERSION="v1.21.1"
+# [ -n "$ENVOY_VERSION" ] || ENVOY_VERSION="v1.25.1"
 # BUILD_ARGS="$BUILD_ARGS --build-arg ENVOY_VERSION=$ENVOY_VERSION"
 
 echo "# Platform: $PLATFORM"
@@ -40,6 +39,8 @@ for STAGE in tooling envoy; do
   $BUILDX build $BUILD_ARGS -t $IMAGE .
 done
 unset IMAGE
+
+exit 0
 
 echo "==> Collecting test settings"
 PORT=8080

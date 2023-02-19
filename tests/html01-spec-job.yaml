@@ -1,0 +1,24 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: html01-spec
+spec:
+  template:
+    metadata:
+      labels:
+        app: tests-html01
+    spec:
+      containers:
+      - name: envoy
+        image: builds-registry.ystack.svc.cluster.local/yolean/envoystatic-tests-html01-debug
+        command:
+        - /bin/bash
+        # current html01.sh, before we write more specs we should figure out a verify workflow
+        - /var/docroot/4a76360c28f9651afd9e7aeb2c352e5c45735b068d9fea197346776c73f11ae4
+        env:
+        - name: HOST
+          value: http://envoystatic-tests-html01
+        - name: DEBUG
+          value: "true"
+      restartPolicy: Never
+  backoffLimit: 4

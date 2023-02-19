@@ -80,16 +80,26 @@ but if anyone has benchmarks we're of course curious.
 
 ## Dev loop
 
+Requires [ystack](https://github.com/Yolean/ystack), RUNPLATFORM should be your cluster's os/arch:
+
 ```
-# Start the first test container for exploration
-DEBUG=true RUN_OPTS="--rm" ./test.sh
+RUNPLATFORM=linux/amd64
+EXPORT_CACHE=false skaffold build --platform=$RUNPLATFORM --file-output=build.artifacts --cache-artifacts=false
+# The job is required because we need to run specs in cluster; skaffold verify runs locally
+kubectl delete job envoystatic-tests-html01-spec --ignore-not-found=true
+skaffold deploy -a build.artifacts
+skaffold verify -a build.artifacts
+```
 
-# Run all tests
-docker stop envoystatic-test
-DEBUG=true NOPUSH=true ./test.sh
+## Release
 
-# For iterating with a local downstream docker build
-DEBUG=true NOPUSH=true PLATFORM="--load" ./test.sh
+```
+skaffold build --file-output=build.artifacts --cache-artifacts=false
+kubectl delete job envoystatic-tests-html01-spec --ignore-not-found=true
+skaffold deploy -a build.artifacts
+skaffold verify -a build.artifacts
+echo "# result images"
+cat build.artifacts | jq -r '.builds | .[] | select(.imageName | contains("test") | not) | .tag'
 ```
 
 ## References
@@ -109,3 +119,8 @@ https://github.com/envoyproxy/envoy/issues/378
   - For example with `npm run build` in a Nextjs project
 - Favicon support
 - Redirect to index.html per subdir
+
+An alternative to inmemory, unless/until Envoy introduces on-request read from disk,
+could be to offload files to blob storage based on size and/or other attributes.
+It would be up to the build step to prepare the blob storage, and define proxy URL mapping.
+A sidecar using Minio could be used as PoC.

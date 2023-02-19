@@ -1,0 +1,73 @@
+apiVersion: skaffold/v3
+kind: Config
+build:
+  tagPolicy:
+    gitCommit:
+      variant: CommitSha
+  platforms:
+  - linux/amd64
+  - linux/arm64/v8
+  artifacts:
+  - image: builds-registry.ystack.svc.cluster.local/yolean/envoystatic-tooling
+    context: .
+    custom:
+      buildCommand: y-build --opt filename=Dockerfile --opt target=tooling
+      # unfortunately this dependencies definition leads to false positives, i.e. stale images at run/dev,
+      # the workaround is --cache-artifacts=false
+      dependencies: &dependencies
+        dockerfile:
+          path: ./Dockerfile
+  - image: builds-registry.ystack.svc.cluster.local/yolean/envoystatic-debug
+    context: .
+    custom:
+      buildCommand: y-build --opt filename=Dockerfile --opt target=envoy
+      dependencies: *dependencies
+  - image: builds-registry.ystack.svc.cluster.local/yolean/envoystatic
+    context: .
+    custom:
+      buildCommand: y-build --opt filename=Dockerfile --opt target=envoy-distroless
+      dependencies: *dependencies
+  - image: builds-registry.ystack.svc.cluster.local/yolean/envoystatic-tests-html01-debug
+    context: ./tests/html01
+    requires:
+    - image: builds-registry.ystack.svc.cluster.local/yolean/envoystatic-tooling
+      alias: ENVOYSTATIC_TOOLING_IMAGE
+    - image: builds-registry.ystack.svc.cluster.local/yolean/envoystatic-debug
+      alias: ENVOYSTATIC_IMAGE
+    custom:
+      buildCommand: &build-command >-
+        y-build --opt filename=Dockerfile
+        --opt build-arg:envoystatic_tooling_image=$ENVOYSTATIC_TOOLING_IMAGE
+        --opt build-arg:envoystatic_image=$ENVOYSTATIC_IMAGE
+      dependencies: *dependencies
+  - image: builds-registry.ystack.svc.cluster.local/yolean/envoystatic-tests-html01
+    context: ./tests/html01
+    requires:
+    - image: builds-registry.ystack.svc.cluster.local/yolean/envoystatic-tooling
+      alias: ENVOYSTATIC_TOOLING_IMAGE
+    - image: builds-registry.ystack.svc.cluster.local/yolean/envoystatic
+      alias: ENVOYSTATIC_IMAGE
+    custom:
+      buildCommand: *build-command
+      dependencies: *dependencies
+manifests:
+  kustomize:
+    paths:
+    - ./tests
+deploy:
+  kubectl: {}
+verify:
+- name: envoystatic-verify
+  container:
+    name: html01
+    image: ghcr.io/orange-opensource/hurl:2.0.1@sha256:1df4d9f85dbccb438f71a3dbb4be7aabd792ca10ff69fdd1572bfd5a6890dda4
+    command:
+    - /bin/sh
+    args:
+    - -ce
+    - |
+      printenv
+      echo "Woot!? skaffold verify runs locally, not in-cluster?"
+      echo GET http://checkip.dyndns.com/ | hurl
+      id
+      false

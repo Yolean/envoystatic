@@ -42,7 +42,7 @@ func Generate(docroot string, content *RouteContent) *route.RouteConfiguration {
 		headers := []*core.HeaderValueOption{}
 		if c.ContentType != "" {
 			headers = append(headers, &core.HeaderValueOption{
-				Append: wrapperspb.Bool(false),
+				AppendAction: core.HeaderValueOption_OVERWRITE_IF_EXISTS_OR_ADD,
 				Header: &core.HeaderValue{
 					Key:   "content-type",
 					Value: c.ContentType,
