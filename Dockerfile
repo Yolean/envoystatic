@@ -45,13 +45,15 @@ CMD [ "envoy", \
 
 FROM --platform=$TARGETPLATFORM envoyproxy/envoy-distroless:${envoy_version} as envoy-distroless
 
+COPY --from=envoy /etc/passwd /etc/group /etc/
+
 COPY --from=envoy /etc/envoy /etc/envoy
 
 USER envoy:nogroup
 
 EXPOSE 8080/tcp
 
-CMD [ "envoy", \
+CMD [ \
   "-c", "/etc/envoy/bootstrap/envoy.yaml", \
   "--service-cluster", "envoystatic", \
   "--service-node", "envoystatic", \

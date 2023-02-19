@@ -40,17 +40,16 @@ build:
         --opt build-arg:envoystatic_tooling_image=$ENVOYSTATIC_TOOLING_IMAGE
         --opt build-arg:envoystatic_image=$ENVOYSTATIC_IMAGE
       dependencies: *dependencies
-  # TODO try distroless when regular works, see also image url in html01-deployment.yaml
-  # - image: builds-registry.ystack.svc.cluster.local/yolean/envoystatic-tests-html01
-  #   context: ./tests/html01
-  #   requires:
-  #   - image: builds-registry.ystack.svc.cluster.local/yolean/envoystatic-tooling
-  #     alias: ENVOYSTATIC_TOOLING_IMAGE
-  #   - image: builds-registry.ystack.svc.cluster.local/yolean/envoystatic
-  #     alias: ENVOYSTATIC_IMAGE
-  #   custom:
-  #     buildCommand: *build-command
-  #     dependencies: *dependencies
+  - image: builds-registry.ystack.svc.cluster.local/yolean/envoystatic-tests-html01
+    context: ./tests/html01
+    requires:
+    - image: builds-registry.ystack.svc.cluster.local/yolean/envoystatic-tooling
+      alias: ENVOYSTATIC_TOOLING_IMAGE
+    - image: builds-registry.ystack.svc.cluster.local/yolean/envoystatic
+      alias: ENVOYSTATIC_IMAGE
+    custom:
+      buildCommand: *build-command
+      dependencies: *dependencies
 manifests:
   kustomize:
     paths:

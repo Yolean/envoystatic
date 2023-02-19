@@ -16,9 +16,7 @@ spec:
     spec:
       containers:
       - name: envoy
-        # image: builds-registry.ystack.svc.cluster.local/yolean/envoystatic-tests-html01
-        # ^ = distroless, first test with regular envoy base
-        image: builds-registry.ystack.svc.cluster.local/yolean/envoystatic-tests-html01-debug
+        image: builds-registry.ystack.svc.cluster.local/yolean/envoystatic-tests-html01
         ports:
         - containerPort: 8080
           name: http

@@ -80,7 +80,7 @@ but if anyone has benchmarks we're of course curious.
 
 ## Dev loop
 
-Requires [ystack](https://github.com/Yolean/ystack):
+Requires [ystack](https://github.com/Yolean/ystack), RUNPLATFORM should be your cluster's os/arch:
 
 ```
 RUNPLATFORM=linux/amd64
