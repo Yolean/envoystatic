@@ -27,7 +27,7 @@ See [example](./tests) [Dockerfile](./tests/html01/Dockerfile).
 The [yolean/envoystatic](yolean/envoystatic)`:tooling-[gitref]`
 image is for the build step.
 
-The [yolean/envoystatic](yolean/envoystatic)`:envoy-[gitref]`
+The [yolean/envoystatic](yolean/envoystatic)`:[gitref]`
 is slightly more opinionated than the official envoy image.
 - Sets loglevel and xDS names as default command.
 - Uses subfolders to `/etc/envoy` for bootstrap and xDS
@@ -100,6 +100,13 @@ skaffold deploy -a build.artifacts
 skaffold verify -a build.artifacts
 echo "# result images"
 cat build.artifacts | jq -r '.builds | .[] | select(.imageName | contains("test") | not) | .tag'
+```
+
+To docker hub given TAG=
+```
+crane cp builds-registry.ystack.svc.cluster.local/yolean/envoystatic-tooling:$TAG yolean/envoystatic:tooling-$TAG
+crane cp builds-registry.ystack.svc.cluster.local/yolean/envoystatic:$TAG yolean/envoystatic:$TAG
+crane cp builds-registry.ystack.svc.cluster.local/yolean/envoystatic-debug:$TAG yolean/envoystatic:debug-$TAG
 ```
 
 ## References
